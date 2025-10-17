@@ -1,0 +1,52 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments and environment files
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE/editor settings
+.vscode/
+.idea/
+*.iml
+.history/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Local TLS certs/keys (ignore secrets; certs folder exists in repo)
+certs/*.key
+certs/*.crt
+certs/*.pem
+certs/*.pfx
+
+# Logs and runtime files
+logs/
+*.log
+
+# Generated artifacts
+artifacts/
+artifacts/**
+
+# Tool caches
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Coverage outputs
+.coverage
+.coverage.*
+coverage/
+coverage_html/
+htmlcov/

@@ -1,0 +1,926 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Securities",
+    "description": "This API offers a digital end-to-end solution for securities applications including\n  - delivery of available securities accounts for a client ID\n  - display transactions of a provided securitiy account\n  - display portfolio overview with all positions of a provided securitiy account.",
+    "version": "4.6.2",
+    "termsOfService": "urn:tos",
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  },
+  "host": "api-sandbox.commerzbank.com",
+  "schemes": [
+    "https"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "basePath": "/securities-api/v4",
+  "tags": [
+    {
+      "name": "accounts",
+      "description": "Accounts API"
+    },
+    {
+      "name": "healthcheck",
+      "description": "Healthcheck API"
+    }
+  ],
+  "paths": {
+    "/healthcheck": {
+      "get": {
+        "tags": [
+          "healthcheck"
+        ],
+        "summary": "Retrieves the service status",
+        "description": "Retrieves the service status",
+        "operationId": "getHealthcheck",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Authorization",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "500": {
+            "description": "Internal Error",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
+        }
+      }
+    },
+    "/accounts": {
+      "get": {
+        "tags": [
+          "accounts"
+        ],
+        "summary": "Get available securities accounts for a customer",
+        "description": "Provides all available securities accounts a customer has the permission to access. If necessary they are filtered due to legal restrictions.",
+        "operationId": "getAccounts",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Authorization",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/AccountsResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "500": {
+            "description": "Internal Error",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{account-id}/portfolio": {
+      "get": {
+        "tags": [
+          "accounts"
+        ],
+        "summary": "Get data on portfolio composition of a securities account.",
+        "description": "Provides data for all holdings (positions) of a given securities account including calculated key figures for the requested reporting date.",
+        "operationId": "getAccountsPortfolio",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Authorization",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "account-id",
+            "in": "path",
+            "description": "Only pseudomized securitiesAccountId accepted.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "effectiveDate",
+            "in": "query",
+            "description": "Gregorian calendar date formatted as `YYYY-MM-DD`. Defaults to current date.",
+            "required": false,
+            "type": "string",
+            "format": "date"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "schema": {
+              "$ref": "#/definitions/PortfolioOverviewResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "500": {
+            "description": "Internal Error",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{account-id}/transactions": {
+      "get": {
+        "tags": [
+          "accounts"
+        ],
+        "summary": "Get data on transactions related to a given securities account.",
+        "description": "Provides all transactions for all holdings of a given securities account including all transaction costs (such as fee details) in a given time period.",
+        "operationId": "getAccountsTransactions",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Authorization",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "account-id",
+            "in": "path",
+            "description": "Only pseudomized securitiesAccountId accepted.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "transactionTypeName",
+            "in": "query",
+            "description": "Filter for transaction type. Valid transactions types are: purchase, sale, delivery, deposit, maturity",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "fromTradingDate",
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "required": false,
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "name": "toTradingDate",
+            "in": "query",
+            "description": "YYYY-MM-DD",
+            "required": false,
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The numbers of transactions to return. Client decides how many transactions to display. As default and minimum 25. Maximum 1000 transactions can be returned.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Cursor must always contain the identification of the first/last page element as well as the direction of the pagination.The cursor is an opaque pointer which is always provided by the service.",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/TransactionsResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "500": {
+            "description": "Internal Error",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "AccountId": {
+      "type": "object",
+      "properties": {
+        "pseudonymizedAccountId": {
+          "type": "string",
+          "description": "The pseudomized securities account ID.",
+          "example": "pseudomized_349320001000"
+        },
+        "securitiesAccountId": {
+          "type": "string",
+          "description": "The publicly known securities account ID (12/13 digits).",
+          "example": "349320001000"
+        }
+      },
+      "title": "AccountId"
+    },
+    "BlockInfo": {
+      "type": "object",
+      "properties": {
+        "blockText": {
+          "type": "string",
+          "description": "Optional description for blocking reason.",
+          "example": "Minimum holding period of 24 months without exemption limit"
+        },
+        "blockTo": {
+          "type": "string",
+          "format": "date",
+          "example": "2019-09-11",
+          "description": "Asset is blocked to which date."
+        }
+      },
+      "title": "BlockInfo"
+    },
+    "CancellationInfo": {
+      "type": "object",
+      "properties": {
+        "cancelledTransactionId": {
+          "type": "string",
+          "description": "Id of the cancellation transaction.",
+          "example": "00000000000000000001"
+        },
+        "isCancelation": {
+          "type": "boolean",
+          "example": true,
+          "description": "true or false."
+        }
+      },
+      "title": "CancellationInfo"
+    },
+    "Cost": {
+      "type": "object",
+      "properties": {
+        "costDescription": {
+          "type": "string",
+          "example": "Provision",
+          "description": "Description of cost."
+        },
+        "money": {
+          "$ref": "#/definitions/Money"
+        }
+      },
+      "title": "Cost"
+    },
+    "CurrentPrice": {
+      "type": "object",
+      "properties": {
+        "price": {
+          "$ref": "#/definitions/Price"
+        },
+        "exchangeRate": {
+          "type": "number",
+          "format": "decimal",
+          "description": "Only for foreign currency exchange rates and euro clearing accounts, otherwise value=1.",
+          "example": 1.0
+        },
+        "exchangeRateDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of determined exchange rate.",
+          "example": "2019-02-20"
+        },
+        "quoteDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of determined quote.",
+          "example": "2019-02-20"
+        }
+      },
+      "title": "CurrentPrice"
+    },
+    "Initialprice": {
+      "type": "object",
+      "properties": {
+        "price": {
+          "$ref": "#/definitions/Price"
+        },
+        "initialExchangeRate": {
+          "type": "number",
+          "format": "decimal",
+          "description": "Only for foreign currency exchange rates and euro clearing accounts, otherwise value=1.",
+          "example": 1.0
+        }
+      },
+      "title": "Initialprice"
+    },
+    "Money": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "format": "decimal",
+          "description": "The amount of money as float number with a descendant number of 2.",
+          "example": 25.73
+        },
+        "currency": {
+          "type": "string",
+          "description": "3 chars currency-code according to ISO-4217.",
+          "example": "EUR"
+        }
+      },
+      "title": "Money"
+    },
+    "PortfolioOverviewResponse": {
+      "type": "object",
+      "properties": {
+        "creationDate": {
+          "type": "string",
+          "format": "date",
+          "example": "2019-02-20",
+          "description": "The date when the report is created."
+        },
+        "effectiveDate": {
+          "type": "string",
+          "format": "date",
+          "example": "2019-02-20",
+          "description": "The date when the securities account is evaluated."
+        },
+        "positions": {
+          "type": "array",
+          "description": "Detailed information about the positions within the portfolio",
+          "items": {
+            "$ref": "#/definitions/Position"
+          }
+        },
+        "securitiesAccountId": {
+          "type": "string",
+          "example": "349320001000",
+          "description": "The publicly known securities account ID (12/13 digits)."
+        },
+        "totalValue": {
+          "$ref": "#/definitions/Money"
+        }
+      },
+      "title": "PortfolioOverviewResponse"
+    },
+    "Position": {
+      "type": "object",
+      "properties": {
+        "accruedInterest": {
+          "$ref": "#/definitions/Money"
+        },
+        "currentPrice": {
+          "$ref": "#/definitions/CurrentPrice"
+        },
+        "initialPrice": {
+          "$ref": "#/definitions/Initialprice"
+        },
+        "lastTradeDate": {
+          "type": "string",
+          "format": "date",
+          "example": "2019-02-20",
+          "description": "The date when the securities was traded for the last time."
+        },
+        "payedAccruedInterest": {
+          "$ref": "#/definitions/Money"
+        },
+        "payout": {
+          "$ref": "#/definitions/Money"
+        },
+        "positionId": {
+          "type": "string",
+          "example": "349320001000_PORTFOLIO_DE000CBK1001_004_0000000000000",
+          "description": "Internal ID of the position."
+        },
+        "quantity": {
+          "$ref": "#/definitions/Quantity"
+        },
+        "masterdata": {
+          "$ref": "#/definitions/PositionsMasterdata",
+          "description": "MasterData of Securities."
+        }
+      },
+      "title": "Position"
+    },
+    "Problem": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "format": "uri-reference",
+          "description": "An absolute URI that identifies the problem type. When dereferenced, it SHOULD provide human-readable documentation for the problem type (e.g., using HTML)."
+        },
+        "title": {
+          "type": "string",
+          "format": "string",
+          "description": "A short, summary of the problem type. Written in english and readable for engineers (usually not suited for non technical stakeholders and not localised)."
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The HTTP status code generated by the origin server for this occurrence of the problem.",
+          "minimum": 100,
+          "maximum": 600,
+          "exclusiveMaximum": true
+        },
+        "detail": {
+          "type": "string",
+          "description": "A human readable explanation specific to this occurrence of the problem."
+        },
+        "instance": {
+          "type": "string",
+          "format": "uri-reference",
+          "description": "An absolute URI that identifies the specific occurrence of the problem.\nIt may or may not yield further information if dereferenced."
+        }
+      },
+      "title": "Problem",
+      "description": "A problem compliant to RFC-7807."
+    },
+    "Quantity": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "format": "decimal",
+          "description": "The number of the quantity as floating point.",
+          "example": 25.73
+        },
+        "unit": {
+          "type": "string",
+          "description": "Dependent on notationType, either currency or \"pieces\".",
+          "example": "EUR"
+        }
+      },
+      "title": "Quantity"
+    },
+    "AccountsResponse": {
+      "type": "object",
+      "properties": {
+        "listFiltered": {
+          "type": "string",
+          "description": "if the list is filtered, the attribute is set to \"y\", else, it is set to  \"n\".",
+          "example": "y"
+        },
+        "securitiesAccountIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AccountId"
+          }
+        }
+      },
+      "title": "AccountsResponse"
+    },
+    "SecuritiesMasterdata": {
+      "type": "object",
+      "properties": {
+        "isin": {
+          "type": "string",
+          "description": "International Securities Identification Number, a 12-character alphanumeric code that serves for uniform identification of a security.",
+          "example": "DE0005190003"
+        },
+        "wkn": {
+          "type": "string",
+          "description": "Wertpapierkennnummer, a German securities identification code of 6 alphanumeric characters.",
+          "example": "519000"
+        },
+        "name": {
+          "type": "string",
+          "description": "Long name of the security.",
+          "example": "Commerzbank AG"
+        },
+        "notationType": {
+          "type": "string",
+          "description": "Notation type of securities.",
+          "example": "Piece"
+        }
+      },
+      "title": "SecuritiesMasterdata"
+    },
+    "PositionsMasterdata": {
+      "type": "object",
+      "properties": {
+        "securitiesMasterdata": {
+          "$ref": "#/definitions/SecuritiesMasterdata"
+        },
+        "currency": {
+          "type": "string",
+          "example": "EUR",
+          "description": "ISO 4217 currency code for securities."
+        },
+        "maturityDate": {
+          "type": "string",
+          "format": "date",
+          "example": "2019-02-20",
+          "description": "Maturity date of securities."
+        },
+        "vote": {
+          "type": "string",
+          "example": "Sell",
+          "description": "Recommendation whether to buy, sell or hold the securities."
+        }
+      },
+      "title": "PositionsMasterdata"
+    },
+    "Size": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "format": "decimal",
+          "example": 150.0,
+          "description": "The amount of the size."
+        },
+        "unit": {
+          "type": "string",
+          "example": "pieces",
+          "description": "Dependent on notationType, either currency or \"pieces\"."
+        }
+      },
+      "title": "Size"
+    },
+    "Transaction": {
+      "type": "object",
+      "properties": {
+        "accruedInterest": {
+          "$ref": "#/definitions/Money"
+        },
+        "blockInfo": {
+          "$ref": "#/definitions/BlockInfo"
+        },
+        "bookingDate": {
+          "type": "string",
+          "format": "date",
+          "example": "2019-02-20",
+          "description": "The BookingDate as string in YYYY-MM-DD format."
+        },
+        "cancellationInfo": {
+          "$ref": "#/definitions/CancellationInfo"
+        },
+        "costs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Cost"
+          }
+        },
+        "depository": {
+          "type": "string",
+          "example": "Girosammel",
+          "description": "Depository of securities."
+        },
+        "exchangeRate": {
+          "type": "number",
+          "format": "decimal",
+          "description": "Only for foreign currency exchange rates and euro clearing accounts, otherwise value=1.",
+          "example": 1.0
+        },
+        "positionId": {
+          "type": "string",
+          "description": "Internal ID of the position.",
+          "example": "349320001000_PORTFOLIO_DE000CBK1001_004_0000000000000"
+        },
+        "price": {
+          "$ref": "#/definitions/Price"
+        },
+        "masterdata": {
+          "$ref": "#/definitions/SecuritiesMasterdata"
+        },
+        "size": {
+          "$ref": "#/definitions/Size"
+        },
+        "tradingDate": {
+          "type": "string",
+          "format": "date",
+          "example": "2019-02-20",
+          "description": "Trading date."
+        },
+        "tradingPlatform": {
+          "type": "string",
+          "example": "Boerse",
+          "description": "Trading platform of securities."
+        },
+        "tradingTimestamp": {
+          "type": "string",
+          "example": "2021-10-04T10:32:08",
+          "description": "Trading time."
+        },
+        "transactionId": {
+          "type": "string",
+          "description": "Id of the transcation.",
+          "example": "0000000000000000001"
+        },
+        "transactionType": {
+          "$ref": "#/definitions/TransactionTypeDefinition"
+        },
+        "valutaDate": {
+          "type": "string",
+          "format": "date",
+          "example": "2019-02-21",
+          "description": "Valuta date."
+        },
+        "settlementAccount": {
+          "type": "string",
+          "description": "Settlement Account + Currency.",
+          "example": "100000000000EUR"
+        },
+        "settlementAccountReference": {
+          "type": "object",
+          "properties": {
+            "iban": {
+              "pattern": "[A-Z]{2,2}[0-9]{2,2}[a-zA-Z0-9]{1,30}",
+              "type": "string",
+              "description": "IBAN for settlement account.",
+              "example": "DE33676400510210421400"
+            },
+            "currency": {
+              "pattern": "[A-Z]{3}",
+              "type": "string",
+              "description": "ISO 4217 Alpha 3 settlement account currency code.",
+              "example": "EUR"
+            }
+          },
+          "description": "Reference to the settlement account."
+        },
+        "marketValue": {
+          "$ref": "#/definitions/Money"
+        },
+        "actualAmount": {
+          "$ref": "#/definitions/Money"
+        },
+        "externalOrderNumber": {
+          "type": "string",
+          "description": "Order Number.",
+          "example": "00001"
+        },
+        "settlementNumber": {
+          "type": "string",
+          "description": "Settlement Number.",
+          "example": "+001000012"
+        },
+        "executionNumber": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Execution Number.",
+          "example": "1"
+        },
+        "clientOrderId": {
+          "type": "string",
+          "description": "The Wertpapier-Auftrags-Identifikations-Nummer (WPAID), which represents a 16-characters order number.",
+          "example": "D0000000000000OM"
+        },
+        "transactionDetailedType": {
+          "type": "string",
+          "description": "Detail type of a transaction. This helps e.g. to distinguish between a money turnover of a securities purchase and a simple debit from a money account.",
+          "example": "PURCHASE_CLEARING"
+        },
+        "taxDetails": {
+          "type": "object",
+          "properties": {
+            "taxes": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TaxDetailsDefinition"
+              }
+            }
+          }
+        }
+      },
+      "title": "Transaction"
+    },
+    "TransactionTypeDefinition": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Type definition of a transaction.",
+          "example": "5"
+        },
+        "name": {
+          "type": "string",
+          "example": "PURCHASE",
+          "description": "name of the type of the transaction."
+        }
+      },
+      "title": "TransactionTypeDefinition"
+    },
+    "TaxDetailsDefinition": {
+      "type": "object",
+      "properties": {
+        "taxType": {
+          "description": "Type of tax.",
+          "type": "string",
+          "example": "10005"
+        },
+        "taxTypeDescription": {
+          "description": "Description of tax type.",
+          "type": "object",
+          "example": "Capital yield tax",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "amount": {
+          "$ref": "#/definitions/Money"
+        }
+      }
+    },
+    "TransactionsResponse": {
+      "type": "object",
+      "properties": {
+        "_links": {
+          "$ref": "#/definitions/TransactionsResponsePaginationLinks"
+        },
+        "securitiesAccountId": {
+          "type": "string",
+          "example": 100123456700,
+          "description": "The publicly known securities account ID (12/13 digits)."
+        },
+        "transactions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Transaction"
+          }
+        }
+      },
+      "title": "TransactionsResponse"
+    },
+    "TransactionsResponsePaginationLinks": {
+      "type": "object",
+      "properties": {
+        "next": {
+          "$ref": "#/definitions/TransactionsResponsePaginationLinksNext"
+        },
+        "prev": {
+          "$ref": "#/definitions/TransactionsResponsePaginationLinksPrev"
+        }
+      },
+      "title": "TransactionsResponsePaginationLinks"
+    },
+    "TransactionsResponsePaginationLinksNext": {
+      "type": "object",
+      "properties": {
+        "href": {
+          "type": "string",
+          "example": "https://api.intranet.commerzbank.com/securities-api/v4/securities-accounts/{securities-account-id}/transactions?transactionTypeName=value&fromDate=value&toDate=value&limit=20&cursor=4567892545",
+          "description": "Link to next site."
+        }
+      },
+      "title": "TransactionsResponsePaginationLinksNext"
+    },
+    "TransactionsResponsePaginationLinksPrev": {
+      "type": "object",
+      "properties": {
+        "href": {
+          "type": "string",
+          "example": "https://api.intranet.commerzbank.com/securities-api/v4/securities-accounts/{securities-account-id}/transactions?transactionTypeName=value&fromDate=value&toDate=value&limit=20&cursor=-945724415",
+          "description": "Link to previous page."
+        }
+      },
+      "title": "TransactionsResponsePaginationLinksPrev"
+    },
+    "Price": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "format": "decimal",
+          "description": "The amount of the current price as floating point.",
+          "example": 25.73
+        },
+        "unit": {
+          "type": "string",
+          "description": "Dependent on notationType, either currency or \"%\".",
+          "example": "EUR"
+        }
+      },
+      "title": "Price"
+    }
+  },
+  "securityDefinitions": {
+    "OAuth (Sandbox) Password": {
+      "type": "oauth2",
+      "description": "The tokenmanager used for sandbox services.",
+      "flow": "password",
+      "tokenUrl": "https://api-sandbox.commerzbank.com/auth/realms/sandbox/protocol/openid-connect/token",
+      "scopes": {}
+    },
+    "OAuth (Sandbox) AuthorizationCode": {
+      "type": "oauth2",
+      "description": "The tokenmanager used for sandbox services.",
+      "flow": "accessCode",
+      "authorizationUrl": "https://api-sandbox.commerzbank.com/auth/realms/sandbox/protocol/openid-connect/auth",
+      "tokenUrl": "https://api-sandbox.commerzbank.com/auth/realms/sandbox/protocol/openid-connect/token",
+      "scopes": {}
+    }
+  }
+}
