@@ -1,150 +1,174 @@
 # RentenDashboard
 
-A Python application for connecting to bank accounts using OAuth authentication and displaying aggregated financial data in a dashboard.
+Connect to bank accounts using OAuth 2.0 and display aggregated financial data in a console dashboard. Initially built against the Commerzbank Securities Sandbox, with secure local HTTPS callback and optional simulated auth for development.
 
 ## Features
 
-- 🔐 Secure OAuth 2.0 authentication for bank accounts
-- 🏦 Multi-bank API integration
-- 📊 Financial data aggregation and processing
-- 🖥️ Console-based dashboard (initial implementation)
-- 📈 Account balance and transaction monitoring
+- 🔐 OAuth 2.0 with local HTTPS callback (https://localhost:8443/callback)
+- 🏦 Bank API integration (Commerzbank Securities Sandbox default)
+- 📊 Aggregation of accounts, positions, and transactions
+- 🖥️ Console dashboard output (Rich-style tables)
+- � Saves raw portfolio JSONs to `artifacts/portfolio/`
 
 ## Prerequisites
 
-- Python 3.8 or higher
-- Bank API credentials (OAuth 2.0 compatible)
+- Python 3.10+ recommended
+- Bank OAuth client (client_id/secret) or sandbox credentials
 
-## Installation
+## Quick start
 
-1. Clone the repository:
+1) Clone and enter the repo
+
 ```bash
 git clone https://github.com/Lunio456/rentendashboard.git
 cd rentendashboard
 ```
 
-2. Create a virtual environment:
+2) Create and activate a virtual environment
+
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 ```
 
-3. Install dependencies:
+3) Install dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Configure your bank API credentials:
+4) Configure environment
+
 ```bash
 cp .env.example .env
-# Edit .env with your actual API credentials
+# Edit .env with your values (see below)
 ```
 
-## Configuration
-
-Create a `.env` file in the project root with your bank API credentials:
+### .env keys
 
 ```env
-# Bank API Configuration
+# --- Bank OAuth (Commerzbank Sandbox defaults are pre-wired) ---
 BANK_CLIENT_ID=your_client_id
 BANK_CLIENT_SECRET=your_client_secret
-BANK_REDIRECT_URI=http://localhost:8080/callback
+BANK_REDIRECT_URI=https://localhost:8443/callback
+BANK_API_BASE_URL=https://api-sandbox.commerzbank.com/securities-api/v4
+BANK_AUTH_URL=https://api-sandbox.commerzbank.com/auth/realms/sandbox/protocol/openid-connect/auth
+BANK_TOKEN_URL=https://api-sandbox.commerzbank.com/auth/realms/sandbox/protocol/openid-connect/token
+BANK_SCOPE=
 
-# Security
-SECRET_KEY=your_secret_key_for_token_encryption
+# Optional sandbox convenience (password grant)
+BANK_USERNAME=
+BANK_PASSWORD=
 
-# Logging
+# --- Security ---
+SECRET_KEY=change_me
+# Optional: TOKEN_ENCRYPTION_KEY (32 bytes; if not base64, a Fernet key is derived)
+TOKEN_ENCRYPTION_KEY=
+
+# --- App / HTTPS callback ---
+TLS_CERT_PATH=certs/dev-localhost.crt
+TLS_KEY_PATH=certs/dev-localhost.key
 LOG_LEVEL=INFO
 ```
 
-## Usage
+Notes:
+- If `BANK_CLIENT_ID/SECRET` and TLS certs are provided, the app uses the authorization code flow with a local HTTPS callback. Otherwise it falls back to a simulated token suitable for development.
+- Ensure the exact redirect URI (https://localhost:8443/callback) is registered with your OAuth client.
 
-Run the application:
+## Run
 
 ```bash
 python main.py
 ```
 
-The application will:
-1. Initiate OAuth authentication with configured banks
-2. Retrieve account information and transaction data
-3. Aggregate the financial data
-4. Display results in the console
+What happens:
+1) OAuth flow starts (auth code flow if configured; otherwise simulated)
+2) Accounts are fetched; for each account the portfolio (positions) is retrieved
+3) Recent transactions are requested (sandbox may return none)
+4) A console dashboard prints summaries and per-account details
+5) Raw portfolio responses are saved under `artifacts/portfolio/` with timestamped filenames
 
-## Project Structure
+## Project structure
 
 ```
-rentendashboard/
-├── main.py                 # Application entry point
-├── requirements.txt        # Python dependencies
-├── .env.example           # Environment configuration template
-├── config/                # Configuration management
+.
+├── main.py
+├── requirements.txt
+├── .env.example
+├── Securities_sandbox.json
+├── certs/
+│   ├── dev-localhost.crt
+│   └── dev-localhost.key
+├── config/
 │   ├── __init__.py
 │   └── settings.py
-├── src/                   # Source code
+├── src/
 │   ├── __init__.py
-│   ├── auth/              # OAuth authentication
+│   ├── auth/
 │   │   ├── __init__.py
+│   │   ├── callback_server.py
 │   │   └── oauth_manager.py
-│   ├── data/              # Bank data connectivity
+│   ├── data/
 │   │   ├── __init__.py
 │   │   └── bank_connector.py
-│   ├── aggregator/        # Data aggregation
+│   ├── aggregator/
 │   │   ├── __init__.py
 │   │   └── data_aggregator.py
-│   └── dashboard/         # Display components
+│   └── dashboard/
 │       ├── __init__.py
 │       └── console_display.py
-└── tests/                 # Test suite
-    ├── __init__.py
-    ├── test_oauth.py
-    ├── test_bank_connector.py
-    └── test_aggregator.py
+└── artifacts/
+    └── portfolio/
 ```
+
+## TLS certificates (local dev)
+
+The local HTTPS callback requires TLS cert/key files. Self-signed development certs are included under `certs/`. If you prefer to generate your own:
+
+```bash
+# optional regeneration (example):
+openssl req -x509 -newkey rsa:2048 -nodes -keyout certs/dev-localhost.key -out certs/dev-localhost.crt -days 365 -subj "/CN=localhost"
+```
+
+Make sure `TLS_CERT_PATH` and `TLS_KEY_PATH` in `.env` point to these files.
+
+## Troubleshooting
+
+- Browser/callback doesn’t open: Copy the printed authorization URL and open it manually; approve and ensure the redirect hits https://localhost:8443/callback.
+- 404s on callback: We serve `/`, `/favicon.ico`, and `/callback`; ensure the path is exactly `/callback`.
+- invalid_scope: Set `BANK_SCOPE` appropriately or leave blank if not required by your client.
+- Token encryption key errors: Provide `TOKEN_ENCRYPTION_KEY`; if not base64, a valid Fernet key will be derived automatically.
+- Sandbox returns no transactions: This is expected at times; positions and total values should still display.
 
 ## Development
 
-### Running Tests
-
-```bash
-pytest
-```
-
-### Code Formatting
+Formatting and linting:
 
 ```bash
 black .
 flake8 .
 ```
 
-### Type Checking
+Type checking:
 
 ```bash
 mypy .
 ```
 
+Tests (if/when added):
+
+```bash
+pytest
+```
+
 ## Security
 
-- All OAuth tokens are encrypted using industry-standard cryptography
-- Environment variables are used for sensitive configuration
-- No credentials are stored in code or logs
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+- OAuth tokens are encrypted before storage in-memory using cryptography.Fernet
+- Sensitive values come from environment variables; secrets aren’t logged
 
 ## Roadmap
 
-- [ ] Web-based dashboard interface
-- [ ] Support for additional bank APIs
-- [ ] Real-time data synchronization
-- [ ] Advanced financial analytics
-- [ ] Data export functionality
+- Web UI dashboard
+- Token persistence across runs
+- Config flag to toggle artifact saving
+- Multi-currency normalization and analytics
